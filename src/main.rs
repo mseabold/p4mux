@@ -1,8 +1,11 @@
 use std::env;
 use std::path::PathBuf;
 
+use crate::format::format_output;
+
 mod config;
 mod p4;
+mod format;
 
 fn get_conf_file(conf_name: &String) -> Option<PathBuf> {
     let p4conf = match env::var("P4CONFIG") {
@@ -33,17 +36,7 @@ fn main() {
 
     if let Some(p4conf_path) = get_conf_file(&conf.perforce.p4conf) {
         if let Some(p4_client) = p4::get_client_from_conf(&p4conf_path) {
-            let logged_in = p4::is_logged_in();
-            let login = if logged_in {
-                conf.tmux.icons.login.clone()
-            }
-            else {
-                conf.tmux.icons.logout.clone()
-            };
-
-            let output = format!("{} {}", p4_client, login);
-
-            println!("{}", output);
+            println!("{}", format_output(&p4_client, &conf));
         }
         else {
             println!("Unable to read p4 config");

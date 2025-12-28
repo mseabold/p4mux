@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::fs;
 use std::io::Result;
+use std::vec::Vec;
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -16,11 +17,25 @@ pub struct TmuxIcons {
     pub logout: String
 }
 
+#[derive(Deserialize, Debug)]
+#[serde(default)]
+pub struct TmuxStyles {
+    pub clear: String,
+    pub login: String,
+    pub logout: String,
+    pub client: String
+}
+
 #[derive(Deserialize)]
 #[serde(default)]
 pub struct TmuxConfig {
+    pub format: Vec<String>,
+
     #[serde(default)]
-    pub icons: TmuxIcons
+    pub icons: TmuxIcons,
+
+    #[serde(default)]
+    pub styles: TmuxStyles
 }
 
 impl Default for PerforceConfig {
@@ -40,10 +55,23 @@ impl Default for TmuxIcons {
     }
 }
 
+impl Default for TmuxStyles {
+    fn default() -> Self {
+        TmuxStyles {
+            clear: "#[fg=default]".to_string(),
+            login: "#[fg=green]".to_string(),
+            logout: "#[fg=red]".to_string(),
+            client: "#[fg=white,bold]".to_string()
+        }
+    }
+}
+
 impl Default for TmuxConfig {
     fn default() -> Self {
         TmuxConfig {
-            icons: Default::default()
+            format: Vec::from(["client".to_string(), " ".to_string(), "login".to_string()]),
+            icons: Default::default(),
+            styles: Default::default()
         }
     }
 }
