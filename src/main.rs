@@ -2,6 +2,7 @@ use std::env;
 use std::path::PathBuf;
 use clap::Parser;
 
+use crate::config::print_config;
 use crate::format::format_output;
 
 mod config;
@@ -14,8 +15,10 @@ struct Cli {
     path: Option<String>,
 
     #[arg(short, long)]
-    verbose: bool
+    verbose: bool,
 
+    #[arg(short, long)]
+    print_cfg: bool
 }
 
 fn get_conf_file(conf_name: &String, current_path: Option<&String>) -> Option<PathBuf> {
@@ -46,8 +49,15 @@ fn get_conf_file(conf_name: &String, current_path: Option<&String>) -> Option<Pa
 }
 
 fn main() {
-    let conf: config::Config = config::get_config().unwrap();
     let args = Cli::parse();
+
+    if args.print_cfg {
+        let defcfg = config::get_default_config();
+        print_config(&defcfg);
+        return;
+    }
+
+    let conf: config::Config = config::get_config().unwrap();
 
     if let Some(p4conf_path) = get_conf_file(&conf.perforce.p4conf, args.path.as_ref()) {
         if let Some(p4_client) = p4::get_client_from_conf(&p4conf_path) {

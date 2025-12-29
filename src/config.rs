@@ -1,16 +1,16 @@
 use std::fs;
 use std::io::Result;
 use std::vec::Vec;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize)]
+#[derive(Deserialize,Serialize)]
 #[serde(default)]
 pub struct PerforceConfig {
     pub p4conf: String,
     pub status_flags: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize,Serialize)]
 #[serde(default)]
 pub struct TmuxIcons {
     pub login: String,
@@ -20,7 +20,7 @@ pub struct TmuxIcons {
     pub delete: String
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize,Serialize, Debug)]
 #[serde(default)]
 pub struct TmuxStyles {
     pub clear: String,
@@ -34,7 +34,7 @@ pub struct TmuxStyles {
     pub reconcile_edit: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize,Serialize)]
 #[serde(default)]
 pub struct TmuxConfig {
     pub format: Vec<String>,
@@ -93,13 +93,28 @@ impl Default for TmuxConfig {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize,Serialize)]
+#[serde(default)]
 pub struct Config {
     #[serde(default)]
     pub perforce: PerforceConfig,
 
     #[serde(default)]
     pub tmux: TmuxConfig
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            perforce: PerforceConfig {
+                ..Default::default()
+            },
+
+            tmux: TmuxConfig {
+                ..Default::default()
+            }
+        }
+    }
 }
 
 pub fn get_config() -> Result<Config> {
@@ -114,4 +129,15 @@ pub fn get_config() -> Result<Config> {
     }
     let config = toml::from_str(&config_str).unwrap();
     return Ok(config);
+}
+
+pub fn get_default_config() -> Config {
+    return Config {
+        ..Default::default()
+    }
+}
+
+pub fn print_config(config: &Config) {
+    let conf_str = toml::to_string(config).unwrap();
+    println!("{conf_str}");
 }
