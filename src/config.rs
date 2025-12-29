@@ -8,13 +8,17 @@ use serde::Deserialize;
 #[serde(default)]
 pub struct PerforceConfig {
     pub p4conf: String,
+    pub status_flags: String,
 }
 
 #[derive(Deserialize)]
 #[serde(default)]
 pub struct TmuxIcons {
     pub login: String,
-    pub logout: String
+    pub logout: String,
+    pub add: String,
+    pub edit: String,
+    pub delete: String
 }
 
 #[derive(Deserialize, Debug)]
@@ -23,7 +27,12 @@ pub struct TmuxStyles {
     pub clear: String,
     pub login: String,
     pub logout: String,
-    pub client: String
+    pub client: String,
+    pub add: String,
+    pub edit: String,
+    pub delete: String,
+    pub reconcile_add: String,
+    pub reconcile_edit: String,
 }
 
 #[derive(Deserialize)]
@@ -42,6 +51,7 @@ impl Default for PerforceConfig {
     fn default() -> Self {
         PerforceConfig {
             p4conf: ".p4.conf".to_string(),
+            status_flags: "-m".to_string()
         }
     }
 }
@@ -50,7 +60,10 @@ impl Default for TmuxIcons {
     fn default() -> Self {
         TmuxIcons {
             login: "󱘖".to_string(),
-            logout: "".to_string()
+            logout: "".to_string(),
+            add: "".to_string(),
+            edit: "".to_string(),
+            delete: "󰆴".to_string()
         }
     }
 }
@@ -61,7 +74,12 @@ impl Default for TmuxStyles {
             clear: "#[fg=default]".to_string(),
             login: "#[fg=green]".to_string(),
             logout: "#[fg=red]".to_string(),
-            client: "#[fg=white,bold]".to_string()
+            client: "#[fg=white,bold]".to_string(),
+            add: "#[fg=yellow,bold]".to_string(),
+            edit: "#[fg=yellow,bold]".to_string(),
+            delete: "#[fg=yellow,bold]".to_string(),
+            reconcile_add: "#[fg=red,bold]".to_string(),
+            reconcile_edit: "#[fg=red,bold]".to_string(),
         }
     }
 }
