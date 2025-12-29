@@ -33,5 +33,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: p4mux
-        path: target/release/p4mux_${{ runner.os }}_${{ runner.arch }}.tgz
+        path: p4mux_${{ runner.os }}_${{ runner.arch }}.tgz
 
