@@ -7,7 +7,8 @@ use std::vec::Vec;
 struct FormatState<'a> {
     client: &'a String,
     status_counts: Option<p4::StatusCounts>,
-    working_path: Option<&'a String>
+    working_path: Option<&'a String>,
+    logged_in: bool
 }
 
 type FormatHandler = fn(&mut FormatState, &Config, &mut Vec<String>);
@@ -25,7 +26,7 @@ fn client_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<St
 }
 
 fn login_handler(state: &mut FormatState, config: &Config, output: &mut Vec<String>) {
-    if p4::is_logged_in(state.working_path) {
+    if state.logged_in {
         output.push(config.tmux.styles.login.clone());
         output.push(config.tmux.icons.login.clone());
     }
@@ -36,6 +37,10 @@ fn login_handler(state: &mut FormatState, config: &Config, output: &mut Vec<Stri
 }
 
 fn open_add_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<String>) {
+    if !state.logged_in {
+        return;
+    }
+
     check_get_status_counts(state, config);
 
     if let Some(counts) = state.status_counts.as_ref() {
@@ -50,6 +55,10 @@ fn open_add_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<
 }
 
 fn open_edit_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<String>) {
+    if !state.logged_in {
+        return;
+    }
+
     check_get_status_counts(state, config);
 
     if let Some(counts) = state.status_counts.as_ref() {
@@ -64,6 +73,10 @@ fn open_edit_handler(state: &mut FormatState, config: &Config, output:  &mut Vec
 }
 
 fn open_delete_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<String>) {
+    if !state.logged_in {
+        return;
+    }
+
     check_get_status_counts(state, config);
 
     if let Some(counts) = state.status_counts.as_ref() {
@@ -78,6 +91,10 @@ fn open_delete_handler(state: &mut FormatState, config: &Config, output:  &mut V
 }
 
 fn reconcile_add_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<String>) {
+    if !state.logged_in {
+        return;
+    }
+
     check_get_status_counts(state, config);
 
     if let Some(counts) = state.status_counts.as_ref() {
@@ -92,6 +109,10 @@ fn reconcile_add_handler(state: &mut FormatState, config: &Config, output:  &mut
 }
 
 fn reconcile_edit_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<String>) {
+    if !state.logged_in {
+        return;
+    }
+
     check_get_status_counts(state, config);
 
     if let Some(counts) = state.status_counts.as_ref() {
@@ -129,7 +150,8 @@ pub fn format_output(path: Option<&String>, client: &String, config: &Config) ->
     let mut state = FormatState {
         client: client,
         status_counts: None,
-        working_path: path
+        working_path: path,
+        logged_in: p4::is_logged_in(path)
     };
 
     for entry in &config.tmux.format {

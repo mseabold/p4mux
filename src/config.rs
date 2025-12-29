@@ -87,7 +87,7 @@ impl Default for TmuxStyles {
 impl Default for TmuxConfig {
     fn default() -> Self {
         TmuxConfig {
-            format: Vec::from(["client".to_string(), " ".to_string(), "login".to_string()]),
+            format: Vec::from(["client".to_string(), " ".to_string(), "login".to_string(), " ".to_string(), "status".to_string()]),
             icons: Default::default(),
             styles: Default::default()
         }
