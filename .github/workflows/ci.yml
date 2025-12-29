@@ -25,7 +25,7 @@ jobs:
     - name: Run tests
       run: cargo test -r --verbose
     - name: Archive artifacts
-      run: tar -C target/release -czf p4mux_${RUNNER_OS}_${RUNNER_ARCH}.tgz p4mux
+      run: tar -C target/release -czf p4mux_${{ runner.os }}_${{ runner.arch }}.tgz p4mux
       shell: bash
     - name: List release artifacts
       run: ls target/release
