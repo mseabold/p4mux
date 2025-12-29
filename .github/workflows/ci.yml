@@ -25,13 +25,13 @@ jobs:
     - name: Run tests
       run: cargo test -r --verbose
     - name: Archive artifacts
-      run: tar -C target/release -czf p4mux_${{ runner.os }}_${{ runner.arch }}.tgz p4mux
+      run: tar -C target/release -czf p4mux.tgz p4mux
       shell: bash
     - name: List release artifacts
       run: ls target/release
     - name: Upload release artifact
       uses: actions/upload-artifact@v4
       with:
-        name: p4mux
-        path: p4mux_${{ runner.os }}_${{ runner.arch }}.tgz
+        name: p4mux_${{ runner.os }}_${{ runner.arch }}.tgz
+        path: p4mux.tgz
 
