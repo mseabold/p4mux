@@ -47,7 +47,7 @@ fn main() {
 
     if let Some(p4conf_path) = get_conf_file(&conf.perforce.p4conf, args.path.as_ref()) {
         if let Some(p4_client) = p4::get_client_from_conf(&p4conf_path) {
-            println!("{}", format_output(&p4_client, &conf));
+            println!("{}", format_output(args.path.as_ref(), &p4_client, &conf));
         }
         else {
             println!("Unable to read p4 config");

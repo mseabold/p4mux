@@ -6,18 +6,26 @@ use std::vec::Vec;
 #[derive(Debug)]
 struct FormatState<'a> {
     client: &'a String,
-    status_counts: Option<p4::StatusCounts>
+    status_counts: Option<p4::StatusCounts>,
+    working_path: Option<&'a String>
 }
 
 type FormatHandler = fn(&mut FormatState, &Config, &mut Vec<String>);
+
+fn check_get_status_counts(state: &mut FormatState, config: &Config) {
+    if state.status_counts.is_none() {
+        let counts = p4::get_status_counts(config, state.working_path).unwrap();
+        state.status_counts = Some(counts);
+    }
+}
 
 fn client_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<String>) {
     output.push(config.tmux.styles.client.clone());
     output.push(state.client.clone());
 }
 
-fn login_handler(_state: &mut FormatState, config: &Config, output: &mut Vec<String>) {
-    if p4::is_logged_in() {
+fn login_handler(state: &mut FormatState, config: &Config, output: &mut Vec<String>) {
+    if p4::is_logged_in(state.working_path) {
         output.push(config.tmux.styles.login.clone());
         output.push(config.tmux.icons.login.clone());
     }
@@ -28,10 +36,7 @@ fn login_handler(_state: &mut FormatState, config: &Config, output: &mut Vec<Str
 }
 
 fn open_add_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<String>) {
-    if state.status_counts.is_none() {
-        let counts = p4::get_status_counts(config).unwrap();
-        state.status_counts = Some(counts);
-    }
+    check_get_status_counts(state, config);
 
     if let Some(counts) = state.status_counts.as_ref() {
         let added = counts.add;
@@ -45,10 +50,7 @@ fn open_add_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<
 }
 
 fn open_edit_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<String>) {
-    if state.status_counts.is_none() {
-        let counts = p4::get_status_counts(config).unwrap();
-        state.status_counts = Some(counts);
-    }
+    check_get_status_counts(state, config);
 
     if let Some(counts) = state.status_counts.as_ref() {
         let edited = counts.edit;
@@ -62,10 +64,7 @@ fn open_edit_handler(state: &mut FormatState, config: &Config, output:  &mut Vec
 }
 
 fn open_delete_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<String>) {
-    if state.status_counts.is_none() {
-        let counts = p4::get_status_counts(config).unwrap();
-        state.status_counts = Some(counts);
-    }
+    check_get_status_counts(state, config);
 
     if let Some(counts) = state.status_counts.as_ref() {
         let edited = counts.delete;
@@ -79,10 +78,7 @@ fn open_delete_handler(state: &mut FormatState, config: &Config, output:  &mut V
 }
 
 fn reconcile_add_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<String>) {
-    if state.status_counts.is_none() {
-        let counts = p4::get_status_counts(config).unwrap();
-        state.status_counts = Some(counts);
-    }
+    check_get_status_counts(state, config);
 
     if let Some(counts) = state.status_counts.as_ref() {
         let added = counts.add_reconcile;
@@ -96,10 +92,7 @@ fn reconcile_add_handler(state: &mut FormatState, config: &Config, output:  &mut
 }
 
 fn reconcile_edit_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<String>) {
-    if state.status_counts.is_none() {
-        let counts = p4::get_status_counts(config).unwrap();
-        state.status_counts = Some(counts);
-    }
+    check_get_status_counts(state, config);
 
     if let Some(counts) = state.status_counts.as_ref() {
         let edited = counts.edit_reconcile;
@@ -120,7 +113,7 @@ fn status_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<St
     reconcile_edit_handler(state, config, output);
 }
 
-pub fn format_output(client: &String, config: &Config) -> String {
+pub fn format_output(path: Option<&String>, client: &String, config: &Config) -> String {
     let mut handlers: HashMap<String, FormatHandler> = HashMap::new();
     handlers.insert("client".to_string(), client_handler);
     handlers.insert("login".to_string(), login_handler);
@@ -135,7 +128,8 @@ pub fn format_output(client: &String, config: &Config) -> String {
 
     let mut state = FormatState {
         client: client,
-        status_counts: None
+        status_counts: None,
+        working_path: path
     };
 
     for entry in &config.tmux.format {

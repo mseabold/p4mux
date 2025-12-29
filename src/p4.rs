@@ -23,6 +23,18 @@ pub struct StatusCounts {
     pub edit_reconcile: u32,
 }
 
+fn build_base_p4_cmd(path: Option<&String>) -> Command {
+    let mut cmd = Command::new("p4");
+
+    cmd.arg("-Mj").arg("-ztag");
+
+    if let Some(ws_path) = path {
+        cmd.arg("-d").arg(ws_path);
+    }
+
+    return cmd;
+}
+
 pub fn get_client_from_conf(conf_path: &Path) -> Option<String> {
     if let Ok(conf) = fs::read_to_string(conf_path) {
         for line in conf.lines() {
@@ -38,14 +50,10 @@ pub fn get_client_from_conf(conf_path: &Path) -> Option<String> {
     return None;
 }
 
-pub fn get_status_counts(config: &Config) -> Result<StatusCounts, &str> {
-    let output = Command::new("p4")
-        .arg("-Mj")
-        .arg("-ztag")
-        .arg("status")
-        .arg(config.perforce.status_flags.as_str())
-        .output()
-        .expect("failed to execute p4 command");
+pub fn get_status_counts(config: &Config, path: Option<&String>) -> Option<StatusCounts> {
+    let mut cmd = build_base_p4_cmd(path);
+    cmd.arg("status").arg(config.perforce.status_flags.as_str());
+    let output = cmd.output().expect("failed to execute p4 command");
 
     if output.status.success() {
         let stdout_str = String::from_utf8(output.stdout).unwrap();
@@ -71,15 +79,17 @@ pub fn get_status_counts(config: &Config) -> Result<StatusCounts, &str> {
             }
         }
 
-        return Ok(counts);
+        return Some(counts);
     }
     else {
-        return Err("p4 status command exited with failure");
+        return None;
     }
 }
 
-pub fn is_logged_in() -> bool {
-    let output = Command::new("p4").arg("login").arg("-s").output().expect("failed to execute p4 command");
+pub fn is_logged_in(path: Option<&String>) -> bool {
+    let mut cmd = build_base_p4_cmd(path);
+    cmd.arg("login").arg("-s");
+    let output = cmd.output().expect("failed to execute p4 command");
 
     return output.status.success();
 }
