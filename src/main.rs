@@ -11,7 +11,11 @@ mod format;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Cli {
-    path: Option<String>
+    path: Option<String>,
+
+    #[arg(short, long)]
+    verbose: bool
+
 }
 
 fn get_conf_file(conf_name: &String, current_path: Option<&String>) -> Option<PathBuf> {
@@ -50,10 +54,14 @@ fn main() {
             println!("{}", format_output(args.path.as_ref(), &p4_client, &conf));
         }
         else {
-            println!("Unable to read p4 config");
+            if args.verbose {
+                println!("Unable to read p4 config");
+            }
         }
     }
     else {
-        println!("Unable to find p4 config file");
+        if args.verbose {
+            println!("Unable to find p4 config file");
+        }
     }
 }
