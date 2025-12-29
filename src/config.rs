@@ -1,4 +1,3 @@
-use std::path::Path;
 use std::fs;
 use std::io::Result;
 use std::vec::Vec;
@@ -103,11 +102,16 @@ pub struct Config {
     pub tmux: TmuxConfig
 }
 
-
-
 pub fn get_config() -> Result<Config> {
-    let path = Path::new("/home/matt/.p4mux.conf");
-    let conf_str = fs::read_to_string(path)?;
-    let config = toml::from_str(&conf_str).unwrap();
+    let mut config_str = String::new();
+
+    if let Some(mut home) = std::env::home_dir() {
+        home.push(".p4mux.conf");
+
+        if home.is_file() {
+            config_str = fs::read_to_string(home.as_path())?;
+        }
+    }
+    let config = toml::from_str(&config_str).unwrap();
     return Ok(config);
 }
