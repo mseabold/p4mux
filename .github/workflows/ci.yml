@@ -29,7 +29,7 @@ jobs:
     - name: Run tests
       run: cargo test -r --verbose
     - name: Archive artifacts
-      run: tar -C target/release -czf p4mux.tgz p4mux
+      run: tar -C target/release -czf p4mux_${{ runner.os }}_${{ runner.arch }}.tgz p4mux
       shell: bash
     - name: List release artifacts
       run: ls target/release
@@ -37,8 +37,10 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: p4mux_${{ runner.os }}_${{ runner.arch }}.tgz
-        path: p4mux.tgz
+        path: p4mux_${{ runner.os }}_${{ runner.arch }}.tgz
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
+      with:
+        files: p4mux_${{ runner.os }}_${{ runner.arch }}.tgz
 
