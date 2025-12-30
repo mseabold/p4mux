@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, ubuntu-24.04-arm, macos-15-intel]
 
     runs-on: ${{ matrix.os }}
 
@@ -34,4 +34,7 @@ jobs:
       with:
         name: p4mux_${{ runner.os }}_${{ runner.arch }}.tgz
         path: p4mux.tgz
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
 
