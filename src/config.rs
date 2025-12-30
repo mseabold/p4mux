@@ -38,6 +38,7 @@ pub struct TmuxStyles {
 #[serde(default)]
 pub struct TmuxConfig {
     pub format: Vec<String>,
+    pub status_sep: String,
 
     #[serde(default)]
     pub icons: TmuxIcons,
@@ -87,6 +88,7 @@ impl Default for TmuxConfig {
     fn default() -> Self {
         TmuxConfig {
             format: Vec::from(["client".to_string(), " ".to_string(), "login".to_string(), " ".to_string(), "status".to_string()]),
+            status_sep: " ".to_string(),
             icons: Default::default(),
             styles: Default::default()
         }

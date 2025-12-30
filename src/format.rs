@@ -27,12 +27,10 @@ fn client_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<St
 
 fn login_handler(state: &mut FormatState, config: &Config, output: &mut Vec<String>) {
     if state.logged_in {
-        output.push(config.tmux.styles.login.clone());
-        output.push(config.tmux.icons.login.clone());
+        output.push(format!("{}{}{}", config.tmux.styles.login, config.tmux.icons.login, config.tmux.styles.clear));
     }
     else {
-        output.push(config.tmux.styles.logout.clone());
-        output.push(config.tmux.icons.logout.clone());
+        output.push(format!("{}{}{}", config.tmux.styles.logout, config.tmux.icons.logout, config.tmux.styles.clear));
     }
 }
 
@@ -47,9 +45,7 @@ fn open_add_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<
         let added = counts.add;
 
         if added > 0 {
-            output.push(config.tmux.styles.add.clone());
-            output.push(added.to_string());
-            output.push(config.tmux.icons.add.clone());
+            output.push(format!("{}{}{}{}", config.tmux.styles.add, added.to_string(), config.tmux.icons.add, config.tmux.styles.clear));
         }
     }
 }
@@ -65,9 +61,7 @@ fn open_edit_handler(state: &mut FormatState, config: &Config, output:  &mut Vec
         let edited = counts.edit;
 
         if edited > 0 {
-            output.push(config.tmux.styles.edit.clone());
-            output.push(edited.to_string());
-            output.push(config.tmux.icons.edit.clone());
+            output.push(format!("{}{}{}{}", config.tmux.styles.edit, edited.to_string(), config.tmux.icons.edit, config.tmux.styles.clear));
         }
     }
 }
@@ -80,12 +74,10 @@ fn open_delete_handler(state: &mut FormatState, config: &Config, output:  &mut V
     check_get_status_counts(state, config);
 
     if let Some(counts) = state.status_counts.as_ref() {
-        let edited = counts.delete;
+        let deleted = counts.delete;
 
-        if edited > 0 {
-            output.push(config.tmux.styles.delete.clone());
-            output.push(edited.to_string());
-            output.push(config.tmux.icons.delete.clone());
+        if deleted > 0 {
+            output.push(format!("{}{}{}{}", config.tmux.styles.delete, deleted.to_string(), config.tmux.icons.delete, config.tmux.styles.clear));
         }
     }
 }
@@ -101,9 +93,7 @@ fn reconcile_add_handler(state: &mut FormatState, config: &Config, output:  &mut
         let added = counts.add_reconcile;
 
         if added > 0 {
-            output.push(config.tmux.styles.reconcile_add.clone());
-            output.push(added.to_string());
-            output.push(config.tmux.icons.add.clone());
+            output.push(format!("{}{}{}{}", config.tmux.styles.reconcile_add, added.to_string(), config.tmux.icons.add, config.tmux.styles.clear));
         }
     }
 }
@@ -119,19 +109,20 @@ fn reconcile_edit_handler(state: &mut FormatState, config: &Config, output:  &mu
         let edited = counts.edit_reconcile;
 
         if edited > 0 {
-            output.push(config.tmux.styles.reconcile_edit.clone());
-            output.push(edited.to_string());
-            output.push(config.tmux.icons.edit.clone());
+            output.push(format!("{}{}{}{}", config.tmux.styles.reconcile_edit, edited.to_string(), config.tmux.icons.edit, config.tmux.styles.clear));
         }
     }
 }
 
 fn status_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<String>) {
-    open_add_handler(state, config, output);
-    open_edit_handler(state, config, output);
-    open_delete_handler(state, config, output);
-    reconcile_add_handler(state, config, output);
-    reconcile_edit_handler(state, config, output);
+    let mut st_segs: Vec<String> = Vec::new();
+    open_add_handler(state, config, &mut st_segs);
+    open_edit_handler(state, config, &mut st_segs);
+    open_delete_handler(state, config, &mut st_segs);
+    reconcile_add_handler(state, config, &mut st_segs);
+    reconcile_edit_handler(state, config, &mut st_segs);
+
+    output.push(st_segs.join(config.tmux.status_sep.as_str()));
 }
 
 pub fn format_output(path: Option<&String>, client: &String, config: &Config) -> String {
