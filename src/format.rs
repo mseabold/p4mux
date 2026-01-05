@@ -7,6 +7,7 @@ use std::vec::Vec;
 struct FormatState<'a> {
     client: &'a String,
     status_counts: Option<p4::StatusCounts>,
+    open_counts: Option<p4::OpenCounts>,
     working_path: Option<&'a String>,
     logged_in: bool
 }
@@ -16,7 +17,16 @@ type FormatHandler = fn(&mut FormatState, &Config, &mut Vec<String>);
 fn check_get_status_counts(state: &mut FormatState, config: &Config) {
     if state.status_counts.is_none() {
         let counts = p4::get_status_counts(config, state.working_path).unwrap();
+        if let Some(opened) = counts.open.as_ref() {
+            state.open_counts = Some(opened.clone());
+        }
         state.status_counts = Some(counts);
+    }
+}
+
+fn check_get_open_counts(state: &mut FormatState) {
+    if state.open_counts.is_none() {
+        state.open_counts = p4::get_open_counts(state.working_path);
     }
 }
 
@@ -39,9 +49,9 @@ fn open_add_handler(state: &mut FormatState, config: &Config, output:  &mut Vec<
         return;
     }
 
-    check_get_status_counts(state, config);
+    check_get_open_counts(state);
 
-    if let Some(counts) = state.status_counts.as_ref() {
+    if let Some(counts) = state.open_counts.as_ref() {
         let added = counts.add;
 
         if added > 0 {
@@ -55,9 +65,9 @@ fn open_edit_handler(state: &mut FormatState, config: &Config, output:  &mut Vec
         return;
     }
 
-    check_get_status_counts(state, config);
+    check_get_open_counts(state);
 
-    if let Some(counts) = state.status_counts.as_ref() {
+    if let Some(counts) = state.open_counts.as_ref() {
         let edited = counts.edit;
 
         if edited > 0 {
@@ -71,9 +81,9 @@ fn open_delete_handler(state: &mut FormatState, config: &Config, output:  &mut V
         return;
     }
 
-    check_get_status_counts(state, config);
+    check_get_open_counts(state);
 
-    if let Some(counts) = state.status_counts.as_ref() {
+    if let Some(counts) = state.open_counts.as_ref() {
         let deleted = counts.delete;
 
         if deleted > 0 {
@@ -141,6 +151,7 @@ pub fn format_output(path: Option<&String>, client: &String, config: &Config) ->
     let mut state = FormatState {
         client: client,
         status_counts: None,
+        open_counts: None,
         working_path: path,
         logged_in: p4::is_logged_in(path)
     };
