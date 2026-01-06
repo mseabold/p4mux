@@ -11,6 +11,7 @@ Inspired by [gitmux](https://github.com/arl/gitmux), this provides a live status
 - Tmux (at least 2.1+)
 - P4 cli (p4) installed in PATH
 - A P4CONFIG-style perforce configuration file at the root of the workspace file provided by either P4CONFIG environment variable or p4mux config
+- A [nerd font](https://www.nerdfonts.com/) for the icons
 
 ## Installing
 ### Binary release
