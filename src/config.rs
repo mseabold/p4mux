@@ -72,7 +72,7 @@ impl Default for TmuxIcons {
 impl Default for TmuxStyles {
     fn default() -> Self {
         TmuxStyles {
-            clear: "#[fg=default]".to_string(),
+            clear: "#[none]".to_string(),
             login: "#[fg=green]".to_string(),
             logout: "#[fg=red]".to_string(),
             client: "#[fg=white,bold]".to_string(),
