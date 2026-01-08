@@ -1,6 +1,7 @@
 use std::fs;
 use std::io::Result;
 use std::vec::Vec;
+use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize,Serialize)]
@@ -119,16 +120,25 @@ impl Default for Config {
     }
 }
 
-pub fn get_config() -> Result<Config> {
+pub fn get_config(cli_path: Option<PathBuf>) -> Result<Config> {
+    let mut path_opt: Option<PathBuf> = None;
     let mut config_str = String::new();
 
-    if let Some(mut home) = std::env::home_dir() {
+    if cli_path.is_some() {
+        path_opt = cli_path;
+    }
+    else if let Some(mut home) = std::env::home_dir() {
         home.push(".p4mux.conf");
 
         if home.is_file() {
-            config_str = fs::read_to_string(home.as_path())?;
+            path_opt = Some(home);
         }
     }
+
+    if let Some(path) = path_opt {
+        config_str = fs::read_to_string(path.as_path())?;
+    }
+
     let config = toml::from_str(&config_str).unwrap();
     return Ok(config);
 }

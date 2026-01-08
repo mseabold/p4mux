@@ -18,7 +18,10 @@ struct Cli {
     verbose: bool,
 
     #[arg(short, long)]
-    print_cfg: bool
+    print_cfg: bool,
+
+    #[arg(short, long)]
+    config: Option<String>
 }
 
 fn get_conf_file(conf_name: &String, current_path: Option<&String>) -> Option<PathBuf> {
@@ -57,7 +60,12 @@ fn main() {
         return;
     }
 
-    let conf: config::Config = config::get_config().unwrap();
+    let conf_path = match args.config {
+        Some(path_str) => Some(PathBuf::from(path_str.as_str())),
+        None => None
+    };
+
+    let conf: config::Config = config::get_config(conf_path).unwrap();
 
     if let Some(p4conf_path) = get_conf_file(&conf.perforce.p4conf, args.path.as_ref()) {
         if let Some(p4_client) = p4::get_client_from_conf(&p4conf_path) {
